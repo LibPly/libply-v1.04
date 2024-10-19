@@ -1,0 +1,6 @@
+[submodule "libply-bk"]
+	path = libply-bk
+	url = https://github.com/DavidG002/libply-bk.git
+[submodule "libply-ui"]
+	path = libply-ui
+	url = https://github.com/DavidG002/libply-ui.git
