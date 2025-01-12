@@ -1,0 +1,23 @@
+# Ignore all submodule working directories
+libply-bk/*
+libply-ui/*
+libply-infra/*
+
+# Node.js (if relevant for infra or the root itself)
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor-specific files
+.vscode/
+.idea/
+*.swp

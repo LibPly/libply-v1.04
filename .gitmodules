@@ -4,3 +4,6 @@
 [submodule "libply-ui"]
 	path = libply-ui
 	url = https://github.com/LibPly/libply-ui.git
+[submodule "libply-infra"]
+	path = libply-infra
+	url = https://github.com/LibPly/libply-infra.git
