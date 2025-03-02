@@ -44,6 +44,10 @@ jobs:
             cd /srv/libply/libply-v1.04
             git pull origin main
             git submodule update --init --recursive
+            cd libply-infra
+            sudo cp /etc/letsencrypt/live/libply.com/fullchain.pem certs/
+            sudo cp /etc/letsencrypt/live/libply.com/privkey.pem certs/
+            sudo chown $USER certs/fullchain.pem certs/privkey.pem
             echo "HTTP_PORT=${{ secrets.HTTP_PORT }}" > libply-infra/.env
             echo "HTTPS_PORT=${{ secrets.HTTPS_PORT }}" >> libply-infra/.env
             echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" > libply-infra/.env
