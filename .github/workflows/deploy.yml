@@ -48,6 +48,8 @@ jobs:
             sudo cp -L /etc/letsencrypt/live/libply.com/fullchain.pem certs/fullchain.pem
             sudo cp -L /etc/letsencrypt/live/libply.com/privkey.pem certs/privkey.pem
             sudo chown $USER certs/fullchain.pem certs/privkey.pem
+            sudo chmod 644 certs/fullchain.pem
+            sudo chmod 600 certs/privkey.pem
             echo "HTTP_PORT=${{ secrets.HTTP_PORT }}" > libply-infra/.env
             echo "HTTPS_PORT=${{ secrets.HTTPS_PORT }}" >> libply-infra/.env
             echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" > libply-infra/.env
@@ -73,8 +75,8 @@ jobs:
             echo "DJANGO_SETTINGS_MODULE=libply.settings.production" >> libply-bk/.env.production
             echo "JWT_ACCESS_TOKEN_LIFETIME=15" >> libply-bk/.env.production
             echo "JWT_REFRESH_TOKEN_LIFETIME=1" >> libply-bk/.env.production
-            sudo cp libply-infra/vps-nginx.conf /etc/nginx/sites-available/libply.com
-            sudo ln -s /etc/nginx/sites-available/libply.com /etc/nginx/sites-enabled/ || true  # Ignore if already linked
+            sudo cp vps-nginx.conf /etc/nginx/sites-available/libply.com
+            sudo ln -sf /etc/nginx/sites-available/libply.com /etc/nginx/sites-enabled/libply.com
             sudo nginx -t
             sudo systemctl reload nginx
             cd libply-infra
