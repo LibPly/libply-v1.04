@@ -36,11 +36,12 @@ jobs:
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.10
+        env:
+          SUDO_PASSWORD: ${{ secrets.SUDO_PASSWORD }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: SUDO_PASSWORD
           script: |
             cd /srv/libply/libply-v1.04
             echo "Setting SSH remote for parent"
@@ -51,15 +52,21 @@ jobs:
             git submodule sync --recursive || echo "Submodule sync failed"
             git submodule update --init --recursive || echo "Submodule update failed"
             cd libply-infra
+            echo "Setting SSH remote for libply-infra"
+            git remote set-url origin git@github.com:LibPly/libply-infra.git
             echo "Updating libply-infra"
             git fetch origin || echo "Fetch failed for libply-infra"
             git checkout main || echo "Checkout main failed for libply-infra"
-            git reset --hard origin/main || echo "Reset failed for libply-infra"
+            git pull origin main || echo "Pull failed for libply-infra"
             cd ../libply-bk
+            echo "Setting SSH remote for libply-bk"
+            git remote set-url origin git@github.com:LibPly/libply-bk.git
             echo "Updating libply-bk"
             git checkout main || echo "Checkout main failed for libply-bk"
             git pull origin main || echo "Pull failed for libply-bk"
             cd ../libply-ui
+            echo "Setting SSH remote for libply-ui"
+            git remote set-url origin git@github.com:LibPly/libply-ui.git
             echo "Updating libply-ui"
             git checkout main || echo "Checkout main failed for libply-ui"
             git pull origin main || echo "Pull failed for libply-ui"
