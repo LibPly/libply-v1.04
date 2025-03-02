@@ -1,9 +1,9 @@
 [submodule "libply-bk"]
-	path = libply-bk
-	url = https://github.com/LibPly/libply-bk.git
-[submodule "libply-ui"]
-	path = libply-ui
-	url = https://github.com/LibPly/libply-ui.git
+    path = libply-bk
+    url = git@github.com:LibPly/libply-bk.git
 [submodule "libply-infra"]
-	path = libply-infra
-	url = https://github.com/LibPly/libply-infra.git
+    path = libply-infra
+    url = git@github.com:LibPly/libply-infra.git
+[submodule "libply-ui"]
+    path = libply-ui
+    url = git@github.com:LibPly/libply-ui.git

@@ -49,8 +49,9 @@ jobs:
             git submodule update --init --recursive || echo "Submodule update failed"
             cd libply-infra
             echo "Updating libply-infra"
+            git fetch origin || echo "Fetch failed for libply-infra"
             git checkout main || echo "Checkout main failed for libply-infra"
-            git pull origin main || echo "Pull failed for libply-infra"
+            git reset --hard origin/main || echo "Reset failed for libply-infra"
             cd ../libply-bk
             echo "Updating libply-bk"
             git checkout main || echo "Checkout main failed for libply-bk"
