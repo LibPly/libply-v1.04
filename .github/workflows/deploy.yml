@@ -1,0 +1,80 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Backend
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/libply-backend:latest ./libply-bk
+          docker push ${{ secrets.DOCKER_USERNAME }}/libply-backend:latest
+
+      - name: Build and Push Frontend
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest ./libply-ui --build-arg NEXT_PUBLIC_API_BASE_URL=https://libply.com/api
+          docker push ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /srv/libply/libply-v1.04
+            git pull origin main
+            git submodule update --init --recursive
+            echo "HTTP_PORT=${{ secrets.HTTP_PORT }}" > libply-infra/.env
+            echo "HTTPS_PORT=${{ secrets.HTTPS_PORT }}" >> libply-infra/.env
+            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" > libply-infra/.env
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> libply-infra/.env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> libply-infra/.env
+            echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> libply-infra/.env
+            echo "POSTGRES_PORT=5432" >> libply-infra/.env
+            echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" > libply-bk/.env.production
+            echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> libply-bk/.env.production
+            echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> libply-bk/.env.production
+            echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> libply-bk/.env.production
+            echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> libply-bk/.env.production
+            echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" >> libply-bk/.env.production
+            echo "EMAIL_USE_SSL=${{ secrets.EMAIL_USE_SSL }}" >> libply-bk/.env.production
+            echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> libply-bk/.env.production
+            echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> libply-bk/.env.production
+            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> libply-bk/.env.production
+            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> libply-bk/.env.production
+            echo "SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}" >> libply-bk/.env.production
+            echo "SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}" >> libply-bk/.env.production
+            echo "SPOTIFY_REDIRECT_URI=${{ secrets.SPOTIFY_REDIRECT_URI }}" >> libply-bk/.env.production
+            echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> libply-bk/.env.production
+            echo "DJANGO_SETTINGS_MODULE=libply.settings.production" >> libply-bk/.env.production
+            echo "JWT_ACCESS_TOKEN_LIFETIME=15" >> libply-bk/.env.production
+            echo "JWT_REFRESH_TOKEN_LIFETIME=1" >> libply-bk/.env.production
+            sudo cp libply-infra/vps-nginx.conf /etc/nginx/sites-available/libply.com
+            sudo ln -s /etc/nginx/sites-available/libply.com /etc/nginx/sites-enabled/ || true  # Ignore if already linked
+            sudo nginx -t
+            sudo systemctl reload nginx
+            cd libply-infra
+            docker-compose down
+            docker pull ${{ secrets.DOCKER_USERNAME }}/libply-backend:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest
+            docker-compose up -d
+            docker image prune -f
