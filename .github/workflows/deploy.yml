@@ -40,8 +40,11 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          envs: SUDO_PASSWORD
           script: |
             cd /srv/libply/libply-v1.04
+            echo "Setting SSH remote for parent"
+            git remote set-url origin git@github.com:LibPly/libply-v1.04.git
             echo "Pulling parent repo"
             git pull origin main || echo "Failed to pull parent repo"
             echo "Syncing submodules"
@@ -61,11 +64,11 @@ jobs:
             git checkout main || echo "Checkout main failed for libply-ui"
             git pull origin main || echo "Pull failed for libply-ui"
             cd ../libply-infra
-            sudo cp -L /etc/letsencrypt/live/libply.com/fullchain.pem certs/fullchain.pem
-            sudo cp -L /etc/letsencrypt/live/libply.com/privkey.pem certs/privkey.pem
-            sudo chown $USER certs/fullchain.pem certs/privkey.pem
-            sudo chmod 644 certs/fullchain.pem
-            sudo chmod 600 certs/privkey.pem
+            echo "$SUDO_PASSWORD" | sudo -S cp -L /etc/letsencrypt/live/libply.com/fullchain.pem certs/fullchain.pem
+            echo "$SUDO_PASSWORD" | sudo -S cp -L /etc/letsencrypt/live/libply.com/privkey.pem certs/privkey.pem
+            echo "$SUDO_PASSWORD" | sudo -S chown $USER certs/fullchain.pem certs/privkey.pem
+            echo "$SUDO_PASSWORD" | sudo -S chmod 644 certs/fullchain.pem
+            echo "$SUDO_PASSWORD" | sudo -S chmod 600 certs/privkey.pem
             echo "HTTP_PORT=${{ secrets.HTTP_PORT }}" > .env
             echo "HTTPS_PORT=${{ secrets.HTTPS_PORT }}" >> .env
             echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
@@ -91,10 +94,10 @@ jobs:
             echo "DJANGO_SETTINGS_MODULE=libply.settings.production" >> ../libply-bk/.env.production
             echo "JWT_ACCESS_TOKEN_LIFETIME=15" >> ../libply-bk/.env.production
             echo "JWT_REFRESH_TOKEN_LIFETIME=1" >> ../libply-bk/.env.production
-            sudo cp /srv/libply/libply-v1.04/libply-infra/vps-nginx.conf /etc/nginx/sites-available/libply.com
-            sudo ln -sf /etc/nginx/sites-available/libply.com /etc/nginx/sites-enabled/libply.com
-            sudo nginx -t || echo "Nginx config test failed"
-            sudo systemctl reload nginx || echo "Nginx reload failed"
+            echo "$SUDO_PASSWORD" | sudo -S cp /srv/libply/libply-v1.04/libply-infra/vps-nginx.conf /etc/nginx/sites-available/libply.com
+            echo "$SUDO_PASSWORD" | sudo -S ln -sf /etc/nginx/sites-available/libply.com /etc/nginx/sites-enabled/libply.com
+            echo "$SUDO_PASSWORD" | sudo -S nginx -t || echo "Nginx config test failed"
+            echo "$SUDO_PASSWORD" | sudo -S systemctl reload nginx || echo "Nginx reload failed"
             docker compose down
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-backend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest
