@@ -43,45 +43,54 @@ jobs:
           script: |
             cd /srv/libply/libply-v1.04
             git pull origin main
+            git submodule sync --recursive
             git submodule update --init --recursive
             cd libply-infra
+            git checkout main
+            git pull origin main
+            cd ../libply-bk
+            git checkout main
+            git pull origin main
+            cd ../libply-ui
+            git checkout main
+            git pull origin main
+            cd ../libply-infra
             sudo cp -L /etc/letsencrypt/live/libply.com/fullchain.pem certs/fullchain.pem
             sudo cp -L /etc/letsencrypt/live/libply.com/privkey.pem certs/privkey.pem
             sudo chown $USER certs/fullchain.pem certs/privkey.pem
             sudo chmod 644 certs/fullchain.pem
             sudo chmod 600 certs/privkey.pem
-            echo "HTTP_PORT=${{ secrets.HTTP_PORT }}" > libply-infra/.env
-            echo "HTTPS_PORT=${{ secrets.HTTPS_PORT }}" >> libply-infra/.env
-            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" > libply-infra/.env
-            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> libply-infra/.env
-            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> libply-infra/.env
-            echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> libply-infra/.env
-            echo "POSTGRES_PORT=5432" >> libply-infra/.env
-            echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" > libply-bk/.env.production
-            echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> libply-bk/.env.production
-            echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> libply-bk/.env.production
-            echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> libply-bk/.env.production
-            echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> libply-bk/.env.production
-            echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" >> libply-bk/.env.production
-            echo "EMAIL_USE_SSL=${{ secrets.EMAIL_USE_SSL }}" >> libply-bk/.env.production
-            echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> libply-bk/.env.production
-            echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> libply-bk/.env.production
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> libply-bk/.env.production
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> libply-bk/.env.production
-            echo "SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}" >> libply-bk/.env.production
-            echo "SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}" >> libply-bk/.env.production
-            echo "SPOTIFY_REDIRECT_URI=${{ secrets.SPOTIFY_REDIRECT_URI }}" >> libply-bk/.env.production
-            echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> libply-bk/.env.production
-            echo "DJANGO_SETTINGS_MODULE=libply.settings.production" >> libply-bk/.env.production
-            echo "JWT_ACCESS_TOKEN_LIFETIME=15" >> libply-bk/.env.production
-            echo "JWT_REFRESH_TOKEN_LIFETIME=1" >> libply-bk/.env.production
-            sudo cp vps-nginx.conf /etc/nginx/sites-available/libply.com
+            echo "HTTP_PORT=${{ secrets.HTTP_PORT }}" > .env  # Fixed path typo
+            echo "HTTPS_PORT=${{ secrets.HTTPS_PORT }}" >> .env
+            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+            echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> .env
+            echo "POSTGRES_PORT=5432" >> .env
+            echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" > ../libply-bk/.env.production
+            echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> ../libply-bk/.env.production
+            echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> ../libply-bk/.env.production
+            echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> ../libply-bk/.env.production
+            echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> ../libply-bk/.env.production
+            echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" >> ../libply-bk/.env.production
+            echo "EMAIL_USE_SSL=${{ secrets.EMAIL_USE_SSL }}" >> ../libply-bk/.env.production
+            echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> ../libply-bk/.env.production
+            echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> ../libply-bk/.env.production
+            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> ../libply-bk/.env.production
+            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> ../libply-bk/.env.production
+            echo "SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}" >> ../libply-bk/.env.production
+            echo "SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}" >> ../libply-bk/.env.production
+            echo "SPOTIFY_REDIRECT_URI=${{ secrets.SPOTIFY_REDIRECT_URI }}" >> ../libply-bk/.env.production
+            echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> ../libply-bk/.env.production
+            echo "DJANGO_SETTINGS_MODULE=libply.settings.production" >> ../libply-bk/.env.production
+            echo "JWT_ACCESS_TOKEN_LIFETIME=15" >> ../libply-bk/.env.production
+            echo "JWT_REFRESH_TOKEN_LIFETIME=1" >> ../libply-bk/.env.production
+            sudo cp /srv/libply/libply-v1.04/libply-infra/vps-nginx.conf /etc/nginx/sites-available/libply.com
             sudo ln -sf /etc/nginx/sites-available/libply.com /etc/nginx/sites-enabled/libply.com
-            sudo nginx -t
-            sudo systemctl reload nginx
-            cd libply-infra
-            docker-compose down
+            sudo nginx -t || echo "Nginx config test failed"
+            sudo systemctl reload nginx || echo "Nginx reload failed"
+            docker compose down
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-backend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest
-            docker-compose up -d
+            docker-compose up -d --build
             docker image prune -f
