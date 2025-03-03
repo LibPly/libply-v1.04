@@ -86,7 +86,7 @@ jobs:
             echo "POSTGRES_HOST=db" >> .env
             echo "POSTGRES_PORT=5433" >> .env
             echo "DOCKER_SETUP=true" > ../libply-bk/.env.production
-            echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> ../libply-bk/.env.production
+            echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
             echo "DEBUG=False" >> ../libply-bk/.env.production
             echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> ../libply-bk/.env.production
             echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> ../libply-bk/.env.production
