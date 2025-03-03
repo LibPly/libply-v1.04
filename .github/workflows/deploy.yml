@@ -84,8 +84,10 @@ jobs:
             echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
             echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
             echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> .env
-            echo "POSTGRES_PORT=5432" >> .env
-            echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" > ../libply-bk/.env.production
+            echo "POSTGRES_PORT=5433" >> .env
+            echo "DOCKER_SETUP=true" > ../libply-bk/.env.production
+            echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> ../libply-bk/.env.production
+            echo "DEBUG=False" >> ../libply-bk/.env.production
             echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> ../libply-bk/.env.production
             echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> ../libply-bk/.env.production
             echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> ../libply-bk/.env.production
@@ -103,12 +105,13 @@ jobs:
             echo "DJANGO_SETTINGS_MODULE=libply.settings.production" >> ../libply-bk/.env.production
             echo "JWT_ACCESS_TOKEN_LIFETIME=15" >> ../libply-bk/.env.production
             echo "JWT_REFRESH_TOKEN_LIFETIME=1" >> ../libply-bk/.env.production
+            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ../libply-bk/.env.production
             echo "$SUDO_PASSWORD" | sudo -S cp /srv/libply/libply-v1.04/libply-infra/vps-nginx.conf /etc/nginx/sites-available/libply.com
             echo "$SUDO_PASSWORD" | sudo -S ln -sf /etc/nginx/sites-available/libply.com /etc/nginx/sites-enabled/libply.com
-            echo "$SUDO_PASSWORD" | sudo -S nginx -t || echo "Nginx config test failed"
-            echo "$SUDO_PASSWORD" | sudo -S systemctl reload nginx || echo "Nginx reload failed"
+            echo "$SUDO_PASSWORD" | sudo -S nginx -t || (echo "Nginx config test failed" && exit 1)
+            echo "$SUDO_PASSWORD" | sudo -S systemctl restart nginx || echo "Nginx restart failed"
             docker compose down
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-backend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest
-            docker compose up -d --build
+            docker compose up -d --build || echo "Docker compose failed"
             docker image prune -f
