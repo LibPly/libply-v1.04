@@ -42,6 +42,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          envs: SUDO_PASSWORD
           script: |
             cd /srv/libply/libply-v1.04
             echo "SUDO_PASSWORD is: $SUDO_PASSWORD"
