@@ -113,5 +113,5 @@ jobs:
             docker compose down
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-backend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest
-            docker compose up -d --build || echo "Docker compose failed"
+            docker compose up -d --build --force-recreate || echo "Docker compose failed"
             docker image prune -f
