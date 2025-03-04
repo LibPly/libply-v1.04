@@ -88,24 +88,25 @@ jobs:
             echo "DOCKER_SETUP=true" > ../libply-bk/.env.production
             echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
             echo "DEBUG=False" >> ../libply-bk/.env.production
-            echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> ../libply-bk/.env.production
-            echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> ../libply-bk/.env.production
-            echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> ../libply-bk/.env.production
-            echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> ../libply-bk/.env.production
-            echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" >> ../libply-bk/.env.production
-            echo "EMAIL_USE_SSL=${{ secrets.EMAIL_USE_SSL }}" >> ../libply-bk/.env.production
-            echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> ../libply-bk/.env.production
-            echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> ../libply-bk/.env.production
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> ../libply-bk/.env.production
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> ../libply-bk/.env.production
-            echo "SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}" >> ../libply-bk/.env.production
-            echo "SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}" >> ../libply-bk/.env.production
-            echo "SPOTIFY_REDIRECT_URI=${{ secrets.SPOTIFY_REDIRECT_URI }}" >> ../libply-bk/.env.production
-            echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> ../libply-bk/.env.production
-            echo "DJANGO_SETTINGS_MODULE=libply.settings.production" >> ../libply-bk/.env.production
-            echo "JWT_ACCESS_TOKEN_LIFETIME=15" >> ../libply-bk/.env.production
-            echo "JWT_REFRESH_TOKEN_LIFETIME=1" >> ../libply-bk/.env.production
-            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> ../libply-bk/.env.production
+            echo "DEBUG=False" >> .env
+            echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> .env
+            echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> .env
+            echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> .env
+            echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> .env
+            echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" >> .env
+            echo "EMAIL_USE_SSL=${{ secrets.EMAIL_USE_SSL }}" >> .env
+            echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
+            echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
+            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+            echo "SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}" >> .env
+            echo "SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}" >> .env
+            echo "SPOTIFY_REDIRECT_URI=${{ secrets.SPOTIFY_REDIRECT_URI }}" >> .env
+            echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" >> .env
+            echo "DJANGO_SETTINGS_MODULE=libply.settings.production" >> .env
+            echo "JWT_ACCESS_TOKEN_LIFETIME=15" >> .env
+            echo "JWT_REFRESH_TOKEN_LIFETIME=1" >> .env
+            echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
             echo "$SUDO_PASSWORD" | sudo -S cp /srv/libply/libply-v1.04/libply-infra/vps-nginx.conf /etc/nginx/sites-available/libply.com
             echo "$SUDO_PASSWORD" | sudo -S ln -sf /etc/nginx/sites-available/libply.com /etc/nginx/sites-enabled/libply.com
             echo "$SUDO_PASSWORD" | sudo -S nginx -t || (echo "Nginx config test failed" && exit 1)
