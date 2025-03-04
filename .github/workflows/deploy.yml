@@ -89,7 +89,7 @@ jobs:
             echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
             echo "DEBUG=False" >> ../libply-bk/.env.production
             echo "DEBUG=False" >> .env
-            echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> .env
+            echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }},localhost" >> .env
             echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> .env
             echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> .env
             echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> .env
