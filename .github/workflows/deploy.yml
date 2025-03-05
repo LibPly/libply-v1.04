@@ -31,7 +31,7 @@ jobs:
 
       - name: Build and Push Frontend
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest ./libply-ui --build-arg NEXT_PUBLIC_API_BASE_URL=https://libply.com/api
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest ./libply-ui --build-arg NEXT_PUBLIC_API_BASE_URL=/api
           docker push ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest
 
       - name: Deploy to VPS
@@ -81,13 +81,18 @@ jobs:
             cat > .env << EOL
             HTTP_PORT=${{ secrets.HTTP_PORT }}
             HTTPS_PORT=${{ secrets.HTTPS_PORT }}
+            FRONTEND_PORT=3001
+            BACKEND_PORT=8001
+            NEXT_PUBLIC_API_BASE_URL=/api
+            HTTP_PORT=${{ secrets.HTTP_PORT }}
+            HTTPS_PORT=${{ secrets.HTTPS_PORT }}
             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             POSTGRES_USER=${{ secrets.POSTGRES_USER }}
             POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             POSTGRES_HOST=db
             POSTGRES_PORT=5433
             DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
-            DEBUG=${DEBUG:-False}
+            DEBUG=False
             ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
             CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
             CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}
@@ -103,12 +108,10 @@ jobs:
             SPOTIFY_REDIRECT_URI=${{ secrets.SPOTIFY_REDIRECT_URI }}
             ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
             DJANGO_SETTINGS_MODULE=libply.settings.production
-            JWT_ACCESS_TOKEN_LIFETIME=15
+            JWT_ACCESS_TOKEN_LIFETIME=30
             JWT_REFRESH_TOKEN_LIFETIME=1
             JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-            NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
             EOL
-            echo "DEBUG=False" > ../libply-bk/.env.production
             echo "$SUDO_PASSWORD" | sudo -S cp /srv/libply/libply-v1.04/libply-infra/vps-nginx.conf /etc/nginx/sites-available/libply.com
             echo "$SUDO_PASSWORD" | sudo -S ln -sf /etc/nginx/sites-available/libply.com /etc/nginx/sites-enabled/libply.com
             echo "$SUDO_PASSWORD" | sudo -S nginx -t || (echo "Nginx config test failed" && exit 1)
@@ -116,5 +119,5 @@ jobs:
             docker compose down
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-backend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest
-            docker compose up -d --build --force-recreate || echo "Docker compose failed"
+            docker compose up -d --build --force-recreate frontend backend db
             docker image prune -f
