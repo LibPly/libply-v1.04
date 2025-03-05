@@ -118,4 +118,5 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-backend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/libply-frontend:latest
             docker compose up -d --build --force-recreate frontend backend db
+            docker cp $(docker ps -q -f name=libply-infra-backend):/libply-bk/staticfiles/. /srv/libply/libply-v1.04/libply-bk/staticfiles/
             docker image prune -f
