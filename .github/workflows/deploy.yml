@@ -104,6 +104,7 @@ jobs:
             SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }}
             SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}
             SPOTIFY_REDIRECT_URI=${{ secrets.SPOTIFY_REDIRECT_URI }}
+            SPOTIFY_CONNECT_REDIRECT_URI=${{ secrets.SPOTIFY_CONNECT_REDIRECT_URI }}
             ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
             DJANGO_SETTINGS_MODULE=libply.settings.production
             JWT_ACCESS_TOKEN_LIFETIME=30
